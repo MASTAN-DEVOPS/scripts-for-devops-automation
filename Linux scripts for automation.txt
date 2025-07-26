@@ -1,0 +1,69 @@
+#!/bin/bash
+# linux_daily_scripts.sh
+# A collection of 10 day-to-day useful Linux scripts for sysadmins and DevOps
+
+# 1. Check Disk Usage
+echo "\n=== Disk Usage ==="
+df -h | grep '^/dev/' > disk_usage.txt
+cat disk_usage.txt
+
+
+# 2. Check Memory Usage
+echo "\n=== Memory Usage ==="
+free -h
+
+
+# 3. Check CPU Load
+echo "\n=== CPU Load Average ==="
+uptime
+
+
+# 4. Monitor Logged-In Users
+echo "\n=== Logged-In Users ==="
+who
+
+
+# 5. Backup a Directory
+src="/etc"
+backup="/backup/etc_$(date +%F).tar.gz"
+mkdir -p /backup
+tar -czf $backup $src
+echo "\nBackup completed: $backup"
+
+
+# 6. Find Large Files (>100MB)
+echo "\n=== Large Files (>100MB) ==="
+find / -type f -size +100M -exec ls -lh {} \; 2>/dev/null | awk '{ print $9 ": " $5 }'
+
+
+# 7. Check Service Status (e.g., nginx)
+service="nginx"
+echo "\n=== Service Status: $service ==="
+if systemctl is-active --quiet $service; then
+    echo "$service is running"
+else
+    echo "$service is not running"
+fi
+
+
+# 8. Monitor Open Ports
+echo "\n=== Open Ports ==="
+ss -tuln
+
+
+# 9. Ping Multiple Hosts
+echo "\n=== Host Reachability ==="
+for host in google.com github.com aws.amazon.com
+do
+  ping -c 1 $host > /dev/null
+  if [ $? -eq 0 ]; then
+    echo "$host is reachable"
+  else
+    echo "$host is not reachable"
+  fi
+done
+
+# 10. List Installed Packages (Debian-based)
+echo "\n=== Installed Packages ==="
+dpkg -l > installed_packages.txt
+echo "Saved to installed_packages.txt"

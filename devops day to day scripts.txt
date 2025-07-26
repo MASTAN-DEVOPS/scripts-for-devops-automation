@@ -1,0 +1,82 @@
+#!/bin/bash
+# devops_daily_scripts.sh
+# A collection of 15 useful daily DevOps automation scripts
+
+# 1. Check Disk Usage
+echo "\n=== Disk Usage ==="
+df -h | grep '^/dev/'
+
+
+# 2. Check Memory and Swap Usage
+echo "\n=== Memory & Swap ==="
+free -m
+
+
+# 3. Check CPU Load
+echo "\n=== CPU Load ==="
+uptime
+
+
+# 4. Monitor Running Services (Systemd)
+echo "\n=== Active Services ==="
+systemctl list-units --type=service --state=running
+
+
+# 5. Backup /etc Directory
+echo "\n=== Backup /etc ==="
+backup_file="/tmp/etc_backup_$(date +%F).tar.gz"
+tar -czf $backup_file /etc && echo "Backup saved to $backup_file"
+
+
+# 6. Check for Failed SSH Login Attempts
+echo "\n=== Failed SSH Logins ==="
+grep 'Failed password' /var/log/auth.log | tail -n 10
+
+
+# 7. Ping Critical Hosts
+echo "\n=== Host Ping Test ==="
+for host in google.com github.com aws.amazon.com
+do
+    ping -c 1 $host &> /dev/null && echo "$host is reachable" || echo "$host is unreachable"
+done
+
+
+# 8. Monitor Docker Containers
+echo "\n=== Docker Containers ==="
+docker ps --format "table {{.Names}}	{{.Status}}"
+
+
+# 9. Restart Service (nginx Example)
+echo "\n=== Restarting nginx ==="
+sudo systemctl restart nginx && echo "nginx restarted"
+
+
+# 10. Check Cron Jobs
+echo "\n=== Cron Jobs for $(whoami) ==="
+crontab -l
+
+
+# 11. Update System (Debian/Ubuntu)
+echo "\n=== System Update ==="
+sudo apt update && sudo apt upgrade -y
+
+
+# 12. Create a User with Sudo Access
+echo "\n=== Creating devopsuser ==="
+sudo useradd -m -s /bin/bash devopsuser && sudo usermod -aG sudo devopsuser
+
+
+# 13. Test SSH Connectivity
+echo "\n=== SSH Test ==="
+ssh -o BatchMode=yes user@192.168.1.100 "exit" && echo "SSH OK" || echo "SSH FAILED"
+
+
+# 14. Clean Docker Resources
+echo "\n=== Docker Cleanup ==="
+docker system prune -f
+
+
+# 15. Archive Log Files
+echo "\n=== Archiving Logs ==="
+log_archive="/tmp/logs_$(date +%F).tar.gz"
+tar -czf $log_archive /var/log/*.log && echo "Logs archived to $log_archive"
