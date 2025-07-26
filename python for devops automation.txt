@@ -1,0 +1,109 @@
+# devops_python_tools.py
+# Python scripts for DevOps automation tasks
+
+import os
+import shutil
+import subprocess
+import socket
+import boto3
+import psutil
+from email.message import EmailMessage
+import smtplib
+
+# 1. Check Disk Usage
+def check_disk_usage():
+    total, used, free = shutil.disk_usage("/")
+    print(f"Total: {total // (2**30)} GB")
+    print(f"Used: {used // (2**30)} GB")
+    print(f"Free: {free // (2**30)} GB")
+
+# 2. List Running Processes
+def list_processes():
+    for proc in psutil.process_iter(['pid', 'name', 'username']):
+        print(proc.info)
+
+# 3. Parse Log File
+def parse_nginx_log(filepath="/var/log/nginx/access.log"):
+    with open(filepath) as f:
+        for line in f:
+            if "500" in line:
+                print("Found 500 error:", line.strip())
+
+# 4. Ping Multiple Servers
+def ping_servers():
+    hosts = ["google.com", "github.com", "aws.amazon.com"]
+    for host in hosts:
+        response = os.system(f"ping -c 1 {host}")
+        status = "UP" if response == 0 else "DOWN"
+        print(f"{host} is {status}")
+
+# 5. Automate Git Clone
+def clone_repos():
+    repos = [
+        "https://github.com/user/repo1.git",
+        "https://github.com/user/repo2.git"
+    ]
+    for repo in repos:
+        os.system(f"git clone {repo}")
+
+# 6. AWS EC2 Instances
+def list_ec2_instances():
+    ec2 = boto3.client('ec2')
+    response = ec2.describe_instances()
+    for reservation in response['Reservations']:
+        for instance in reservation['Instances']:
+            print(f"Instance ID: {instance['InstanceId']}, State: {instance['State']['Name']}")
+
+# 7. Send Email Alert
+def send_alert_email():
+    msg = EmailMessage()
+    msg.set_content("Disk usage is above 90%!")
+    msg['Subject'] = "Server Alert"
+    msg['From'] = "admin@example.com"
+    msg['To'] = "you@example.com"
+
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+        smtp.starttls()
+        smtp.login("your_email@gmail.com", "your_password")
+        smtp.send_message(msg)
+
+# 8. CI/CD Deployment Script
+def deploy_application():
+    commands = [
+        "git pull origin main",
+        "docker build -t myapp .",
+        "docker stop myapp || true",
+        "docker rm myapp || true",
+        "docker run -d -p 80:80 --name myapp myapp"
+    ]
+    for cmd in commands:
+        print(f"Running: {cmd}")
+        subprocess.run(cmd, shell=True)
+
+# 9. Monitor Port
+def check_port(host="localhost", port=22):
+    s = socket.socket()
+    try:
+        s.connect((host, port))
+        print(f"Port {port} on {host} is open")
+    except:
+        print(f"Port {port} on {host} is closed")
+    finally:
+        s.close()
+
+# 10. Generate SSH Key Pair
+def generate_ssh_keys():
+    os.system("ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -q -N ''")
+    print("SSH key pair generated.")
+
+# Uncomment below to test any function manually
+# check_disk_usage()
+# list_processes()
+# parse_nginx_log()
+# ping_servers()
+# clone_repos()
+# list_ec2_instances()
+# send_alert_email()
+# deploy_application()
+# check_port()
+# generate_ssh_keys()
